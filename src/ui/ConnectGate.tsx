@@ -10,16 +10,14 @@ import { Button } from "@/src/ui/Button";
 import {
   ConnectButton,
   useActiveAccount,
-  useActiveWallet,
   useConnect,
-  useDisconnect,
   darkTheme,
   lightTheme,
 } from "thirdweb/react";
 import { createWallet, EIP1193 } from "thirdweb/wallets";
 
 /**
- * Strict EIP-1193 shape required by thirdweb's EIP1193 adapter:
+ * Strict EIP-1193 shape required by thirdweb's adapter:
  * - request()
  * - on()
  * - removeListener()
@@ -34,34 +32,73 @@ type LooseInjectedProvider = {
   request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
   on?: (event: unknown, listener: (params: unknown) => unknown) => void;
   removeListener?: (event: unknown, listener: (params: unknown) => unknown) => void;
+
+  // common flags (not always present / reliable)
   isMetaMask?: boolean;
   isRabby?: boolean;
+  isCoinbaseWallet?: boolean;
+  isBraveWallet?: boolean;
+
+  // metamask-specific object (helps us be confident when it actually is MetaMask)
+  _metamask?: unknown;
+
+  // some environments expose multiple injected providers
+  providers?: LooseInjectedProvider[];
 };
 
-// “More options” wallets (thirdweb modal)
+// Thirdweb modal wallets
 const wallets = [
   createWallet("io.metamask"),
   createWallet("io.rabby"),
   createWallet("com.coinbase.wallet"),
 ];
-
 const recommendedWallets = [createWallet("io.metamask"), createWallet("io.rabby")];
 
-function useInjectedProvider() {
-  const [provider, setProvider] = React.useState<LooseInjectedProvider | null>(null);
+function useInjectedEthereum() {
+  const [eth, setEth] = React.useState<LooseInjectedProvider | null>(null);
 
   React.useEffect(() => {
     const w = globalThis as unknown as { ethereum?: LooseInjectedProvider };
-    setProvider(w.ethereum ?? null);
+    setEth(w.ethereum ?? null);
   }, []);
 
-  return provider;
+  return eth;
 }
 
-/**
- * Normalize an injected provider into the strict shape thirdweb expects.
- * Some wallets omit `on` / `removeListener`, so we supply safe no-ops.
- */
+function pickInjectedProvider(eth: LooseInjectedProvider | null) {
+  if (!eth) return null;
+
+  const list = Array.isArray(eth.providers) && eth.providers.length > 0 ? eth.providers : null;
+  if (!list) return eth;
+
+  // Prefer explicit providers if multiple exist
+  const rabby = list.find((p) => p.isRabby);
+  if (rabby) return rabby;
+
+  const coinbase = list.find((p) => p.isCoinbaseWallet);
+  if (coinbase) return coinbase;
+
+  // MetaMask-like providers are common; only treat as MetaMask when confident later
+  const metaLike = list.find((p) => p.isMetaMask);
+  if (metaLike) return metaLike;
+
+  return list[0] ?? eth;
+}
+
+function detectInjectedLabel(p: LooseInjectedProvider | null): { label: string; confident: boolean } {
+  if (!p) return { label: "No wallet detected", confident: false };
+
+  if (p.isRabby) return { label: "Rabby", confident: true };
+  if (p.isCoinbaseWallet) return { label: "Coinbase Wallet", confident: true };
+  if (p.isBraveWallet) return { label: "Brave Wallet", confident: true };
+
+  // MetaMask flag is often spoofed for compatibility — only call it MetaMask if it exposes _metamask
+  if (p.isMetaMask && p._metamask) return { label: "MetaMask", confident: true };
+
+  // Otherwise stay neutral
+  return { label: "Injected wallet", confident: false };
+}
+
 function toStrictProvider(p: LooseInjectedProvider): StrictEip1193Provider {
   const noop = () => undefined;
 
@@ -103,6 +140,9 @@ function useThirdwebBrandTheme() {
 
   const isDark = resolvedTheme === "dark";
 
+  // Critical: green buttons must use “ink” text (not green)
+  const accentInk = vars.bg;
+
   return isDark
     ? darkTheme({
         colors: {
@@ -112,10 +152,10 @@ function useThirdwebBrandTheme() {
           secondaryText: vars.muted,
 
           accentButtonBg: vars.accent,
-          accentText: vars.primary,
+          accentText: accentInk,
 
           primaryButtonBg: vars.accent,
-          primaryButtonText: vars.primary,
+          primaryButtonText: accentInk,
 
           secondaryButtonBg: vars.bg,
           secondaryButtonText: vars.text,
@@ -156,10 +196,11 @@ export function ConnectGate({
   subtitle?: string;
 }) {
   const account = useActiveAccount();
-  const activeWallet = useActiveWallet();
-  const injected = useInjectedProvider();
+  const injectedEth = useInjectedEthereum();
+  const injected = pickInjectedProvider(injectedEth);
+  const injectedInfo = detectInjectedLabel(injected);
+
   const { connect, isConnecting } = useConnect();
-  const { disconnect } = useDisconnect();
   const thirdwebTheme = useThirdwebBrandTheme();
 
   const onQuickConnect = async () => {
@@ -174,31 +215,8 @@ export function ConnectGate({
     });
   };
 
-  if (account) {
-    const addr = account.address;
-    const short = `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-
-    return (
-      <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-[0_1px_0_rgba(255,255,255,0.06)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="text-sm font-semibold">Connected</div>
-            <div className="mt-1 text-sm text-muted">Wallet: {short}</div>
-          </div>
-
-          <Button
-            variant="secondary"
-            onClick={() => {
-              if (activeWallet) disconnect(activeWallet);
-            }}
-            className="w-full sm:w-auto"
-          >
-            Disconnect
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Once connected, we show the dApp grid; header pill handles status + disconnect globally.
+  if (account) return null;
 
   return (
     <section
@@ -212,9 +230,22 @@ export function ConnectGate({
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-3xl border border-border/80 bg-background p-6">
-          <div className="text-sm font-semibold">Browser Wallet</div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm font-semibold">Wallet Extension / In-App Browser</div>
+
+            {injected ? (
+              <span className="rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/80">
+                {injectedInfo.confident ? `Detected: ${injectedInfo.label}` : "Wallet detected"}
+              </span>
+            ) : (
+              <span className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted">
+                Not detected
+              </span>
+            )}
+          </div>
+
           <p className="mt-2 text-sm text-muted leading-relaxed">
-            Best for injected wallets (including in-app browsers and most extensions).
+            Recommended for wallets that inject a provider (extensions and in-app wallet browsers).
           </p>
 
           <div className="mt-5">
@@ -225,11 +256,7 @@ export function ConnectGate({
               className="w-full sm:w-auto"
               title={!injected ? "No injected wallet detected in this browser" : undefined}
             >
-              {!injected
-                ? "No Browser Wallet Found"
-                : isConnecting
-                ? "Connecting…"
-                : "Continue with Browser Wallet"}
+              {!injected ? "Open in a wallet browser" : isConnecting ? "Connecting…" : "Continue"}
             </Button>
           </div>
 
@@ -239,9 +266,9 @@ export function ConnectGate({
         </div>
 
         <div className="rounded-3xl border border-border/80 bg-background p-6">
-          <div className="text-sm font-semibold">More options</div>
+          <div className="text-sm font-semibold">Other connection methods</div>
           <p className="mt-2 text-sm text-muted leading-relaxed">
-            Use the standard connector for supported wallets and connection methods.
+            Use the standard connector to choose from supported wallets.
           </p>
 
           <div className="mt-5">
@@ -258,6 +285,10 @@ export function ConnectGate({
               }}
             />
           </div>
+
+          <p className="mt-3 text-xs text-muted">
+            For the smoothest in-wallet experience, use the option on the left.
+          </p>
         </div>
       </div>
     </section>

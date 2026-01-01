@@ -6,6 +6,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { Container } from "@/src/ui/Container";
 import { Button } from "@/src/ui/Button";
 import { ConnectGate } from "@/src/ui/ConnectGate";
+import { WalletHeaderPill } from "../WalletHeaderPill";
 
 function Logo() {
   return (
@@ -88,11 +89,13 @@ export function AppHome() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur">
         <Container className="h-16 flex items-center justify-between">
           <Logo />
-          <div className="flex items-center gap-3">
-            <Button href="/" variant="ghost" size="sm">
-              Landing
-            </Button>
-          </div>
+ <div className="flex items-center gap-3">
+  <WalletHeaderPill />
+  <Button href="/" variant="ghost" size="sm">
+    Landing
+  </Button>
+</div>
+
         </Container>
       </header>
 
