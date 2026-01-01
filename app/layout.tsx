@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
+import "@rainbow-me/rainbowkit/styles.css";
 import "./globals.css";
-import { ThemeProvider } from "@/src/theme/ThemeProvider";
+import { Providers } from "./providers";
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -13,52 +14,35 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://decentroneum.com"),
   title: {
     default: "Decentroneum",
-    template: "%s · Decentroneum",
+    template: "%s • Decentroneum",
   },
   description:
-    "Decentroneum is the home of Decent Wallet — a secure, non-custodial wallet built for the Electroneum ecosystem. Download on iOS and Android.",
-  applicationName: "Decentroneum",
-  keywords: [
-    "Decentroneum",
-    "Decent Wallet",
-    "Electroneum",
-    "EVM",
-    "non-custodial wallet",
-    "Web3 wallet",
-  ],
-  alternates: { canonical: "/" },
+    "Decentroneum is a Web3 platform for the Electroneum ecosystem — bringing tools, utilities, and a mobile wallet together in one dependable experience.",
   openGraph: {
-    type: "website",
-    url: "/",
-    siteName: "Decentroneum",
     title: "Decentroneum",
     description:
-      "Download Decent Wallet for iOS and Android — non-custodial, Electroneum-focused, security-first.",
-    images: [
-      { url: "/og.png", width: 1200, height: 630, alt: "Decentroneum" },
-    ],
+      "A Web3 platform for the Electroneum ecosystem — tools, utilities, and Decent Wallet.",
+    url: "https://decentroneum.com",
+    siteName: "Decentroneum",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Decentroneum",
     description:
-      "Download Decent Wallet for iOS and Android — a non-custodial wallet for the Electroneum ecosystem.",
-    images: ["/og.png"],
+      "A Web3 platform for the Electroneum ecosystem — tools, utilities, and Decent Wallet.",
   },
-  icons: {
-    icon: [{ url: "/favicon.ico" }, { url: "/icon.png", type: "image/png" }],
-    apple: [{ url: "/apple-touch-icon.png" }],
+  robots: {
+    index: true,
+    follow: true,
   },
-  robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={lexend.variable}>
+    <html lang="en" className={lexend.variable} suppressHydrationWarning>
       <body className="antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

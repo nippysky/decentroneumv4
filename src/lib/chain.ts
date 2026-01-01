@@ -1,16 +1,18 @@
-import { defineChain } from "thirdweb";
+import { defineChain } from "viem";
 
 export const electroneum = defineChain({
   id: 52014,
-  rpc: "https://rpc.ankr.com/electroneum",
+  name: "Electroneum",
   nativeCurrency: { name: "Electroneum", symbol: "ETN", decimals: 18 },
-  blockExplorers: [
-    { name: "Electroneum Block Explorer", url: "https://blockexplorer.electroneum.com" },
-  ],
-  icon: {
-    url: "https://s2.coinmarketcap.com/static/img/coins/200x200/2137.png",
-    width: 200,
-    height: 200,
-    format: "png",
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_ETN_RPC_URL || "https://rpc.ankr.com/electroneum"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Electroneum Explorer",
+      url: "https://blockexplorer.electroneum.com",
+    },
   },
 });

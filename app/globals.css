@@ -124,3 +124,16 @@ html {
     transition: none !important;
   }
 }
+
+
+/* Keep RainbowKit UI on brand font */
+body [data-rk] {
+  font-family: var(--font-lexend), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* If RainbowKit's wrapper affects layout, keep it full-height */
+body > [data-rk] {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
