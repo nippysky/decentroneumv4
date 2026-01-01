@@ -2,9 +2,9 @@
 "use client";
 
 import * as React from "react";
-import { useAccount } from "wagmi";
 import { Container } from "@/src/ui/Container";
 import { useDecentWalletAccount } from "@/src/lib/decentWallet";
+import { useActiveAccount } from "thirdweb/react";
 
 function GateCard({
   title,
@@ -25,12 +25,10 @@ function GateCard({
 }
 
 export default function AppHome() {
-  const wagmi = useAccount();
   const dw = useDecentWalletAccount();
+  const twAccount = useActiveAccount();
 
-  // ✅ If inside Decent Wallet, trust injected provider connection
-  // ✅ Otherwise, use wagmi/rainbowkit connection
-  const isConnected = dw.isDecentWallet ? dw.isConnected : wagmi.isConnected;
+  const isConnected = dw.isDecentWallet ? dw.isConnected : !!twAccount;
 
   return (
     <div className="pt-10 sm:pt-14">
@@ -60,7 +58,7 @@ export default function AppHome() {
                 desc="Fewer prompts, fewer failed sessions, and a consistent connection experience across the app."
               >
                 <div className="text-xs text-muted">
-                  RainbowKit handles injected wallets and WalletConnect under one UX.
+                  Decent Wallet connects via injected provider. Other browsers use the Thirdweb connect modal.
                 </div>
               </GateCard>
             </div>

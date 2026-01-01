@@ -4,7 +4,7 @@
 
 import * as React from "react";
 
-type Eip1193Provider = {
+export type Eip1193Provider = {
   isDecentWallet?: boolean;
   request: (args: { method: string; params?: any[] }) => Promise<any>;
   on?: (event: string, fn: (...args: any[]) => void) => void;
@@ -37,6 +37,39 @@ export async function dwRequestAccounts(): Promise<string[]> {
   if (!eth) throw new Error("No injected provider");
   const acc = await eth.request({ method: "eth_requestAccounts" });
   return Array.isArray(acc) ? acc : [];
+}
+
+/**
+ * “Disconnect” for injected wallets is not standardized.
+ * We do best-effort:
+ * - try wallet_revokePermissions (MetaMask-ish)
+ * - try wallet_requestPermissions empty
+ * - then just clear local state (the hook) as a final UX fallback.
+ */
+export async function dwDisconnect(): Promise<void> {
+  const eth = getEthereum();
+  if (!eth) return;
+
+  // Try EIP-2255-ish revoke permissions
+  try {
+    await eth.request({
+      method: "wallet_revokePermissions",
+      params: [{ eth_accounts: {} }],
+    });
+    return;
+  } catch {
+    // ignore
+  }
+
+  // Some wallets use requestPermissions
+  try {
+    await eth.request({
+      method: "wallet_requestPermissions",
+      params: [{ eth_accounts: {} }],
+    });
+  } catch {
+    // ignore
+  }
 }
 
 export function useDecentWalletAccount() {
@@ -84,11 +117,19 @@ export function useDecentWalletAccount() {
     setAddress(accounts[0] ?? null);
   }, [isDW]);
 
+  const disconnect = React.useCallback(async () => {
+    if (!isDW) return;
+    await dwDisconnect();
+    // Even if revoke fails, we clear local session for UX.
+    setAddress(null);
+  }, [isDW]);
+
   return {
     ready,
     isDecentWallet: isDW,
     address,
     isConnected: !!address,
     connect,
+    disconnect,
   };
 }
