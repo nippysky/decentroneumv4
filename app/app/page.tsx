@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/app/page.tsx
 "use client";
 
 import * as React from "react";
 import { useAccount } from "wagmi";
 import { Container } from "@/src/ui/Container";
+import { useDecentWalletAccount } from "@/src/lib/decentWallet";
 
 function GateCard({
   title,
@@ -24,214 +24,19 @@ function GateCard({
   );
 }
 
-type EthDebug = {
-  hasEthereum: boolean;
-  isDecentWallet: boolean;
-  isMetaMask: boolean;
-  hasRequest: boolean;
-  hasOn: boolean;
-  hasRemoveListener: boolean;
-  chainId?: string;
-  selectedAddress?: string | null;
-  accounts?: string[];
-  ua: string;
-};
-
-function shortAddr(a?: string | null) {
-  if (!a) return "";
-  return a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
-}
-
-function readEthDebug(): EthDebug {
-  const w = window as unknown as {
-    ethereum?: any;
-    navigator: Navigator;
-  };
-
-  const eth = w.ethereum;
-  const hasEthereum = !!eth;
-
-  const safeBool = (v: any) => Boolean(v);
-
-  return {
-    hasEthereum,
-    isDecentWallet: safeBool(eth?.isDecentWallet),
-    isMetaMask: safeBool(eth?.isMetaMask),
-    hasRequest: typeof eth?.request === "function",
-    hasOn: typeof eth?.on === "function",
-    hasRemoveListener: typeof eth?.removeListener === "function",
-    chainId: typeof eth?.chainId === "string" ? eth.chainId : undefined,
-    selectedAddress: typeof eth?.selectedAddress === "string" ? eth.selectedAddress : null,
-    accounts: Array.isArray(eth?.selectedAddress)
-      ? eth.selectedAddress
-      : Array.isArray(eth?.accounts)
-        ? eth.accounts
-        : undefined,
-    ua: w.navigator.userAgent,
-  };
-}
-
-function DebugBanner() {
-  const [mounted, setMounted] = React.useState(false);
-  const [open, setOpen] = React.useState(false);
-  const [snap, setSnap] = React.useState<EthDebug | null>(null);
-
-  React.useEffect(() => {
-    setMounted(true);
-
-    const update = () => {
-      try {
-        setSnap(readEthDebug());
-      } catch {
-        setSnap({
-          hasEthereum: false,
-          isDecentWallet: false,
-          isMetaMask: false,
-          hasRequest: false,
-          hasOn: false,
-          hasRemoveListener: false,
-          ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-        });
-      }
-    };
-
-    update();
-
-    // Listen for late injections (common in WebViews)
-    const onInit = () => update();
-    window.addEventListener("ethereum#initialized" as any, onInit);
-
-    // Some providers emit these
-    const eth = (window as any).ethereum;
-    const onAccounts = () => update();
-    const onChain = () => update();
-    const onConnect = () => update();
-    const onDisconnect = () => update();
-
-    try {
-      eth?.on?.("accountsChanged", onAccounts);
-      eth?.on?.("chainChanged", onChain);
-      eth?.on?.("connect", onConnect);
-      eth?.on?.("disconnect", onDisconnect);
-    } catch {
-      // ignore
-    }
-
-    // Also poll briefly because some WebViews inject without events
-    let ticks = 0;
-    const iv = window.setInterval(() => {
-      ticks += 1;
-      update();
-      if (ticks >= 10) window.clearInterval(iv); // ~2.5s total
-    }, 250);
-
-    return () => {
-      window.removeEventListener("ethereum#initialized" as any, onInit);
-      window.clearInterval(iv);
-      try {
-        eth?.removeListener?.("accountsChanged", onAccounts);
-        eth?.removeListener?.("chainChanged", onChain);
-        eth?.removeListener?.("connect", onConnect);
-        eth?.removeListener?.("disconnect", onDisconnect);
-      } catch {
-        // ignore
-      }
-    };
-  }, []);
-
-  if (!mounted || !snap) return null;
-
-  const status =
-    snap.hasEthereum && snap.hasRequest
-      ? snap.isDecentWallet
-        ? "Injected: Decent Wallet"
-        : snap.isMetaMask
-          ? "Injected: MetaMask"
-          : "Injected: Unknown"
-      : "No injected provider";
-
-  const badgeTone =
-    status === "No injected provider"
-      ? "border-danger/40 text-danger"
-      : snap.isDecentWallet
-        ? "border-accent/40 text-accent"
-        : "border-foreground/20 text-foreground";
-
-  const isBad = status === "No injected provider" || !snap.hasOn || !snap.hasRemoveListener;
-
-  return (
-    <div className="mt-6">
-      <div
-        className={[
-          "rounded-2xl border bg-background px-4 py-3",
-          isBad ? "border-danger/30" : "border-border",
-        ].join(" ")}
-      >
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${badgeTone}`}>
-              {status}
-            </span>
-
-            {snap.chainId ? (
-              <span className="text-xs text-muted">
-                chainId: <span className="text-foreground/90">{snap.chainId}</span>
-              </span>
-            ) : null}
-
-            {snap.selectedAddress ? (
-              <span className="text-xs text-muted">
-                addr: <span className="text-foreground/90">{shortAddr(snap.selectedAddress)}</span>
-              </span>
-            ) : null}
-
-            <span className="text-xs text-muted">
-              request: <span className="text-foreground/90">{snap.hasRequest ? "yes" : "no"}</span> • on:{" "}
-              <span className="text-foreground/90">{snap.hasOn ? "yes" : "no"}</span> • removeListener:{" "}
-              <span className="text-foreground/90">{snap.hasRemoveListener ? "yes" : "no"}</span>
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="text-xs text-muted hover:text-foreground transition"
-          >
-            {open ? "Hide debug" : "Show debug"}
-          </button>
-        </div>
-
-        {open ? (
-          <div className="mt-3 rounded-xl border border-border bg-card p-3">
-            <div className="text-xs text-muted leading-relaxed">
-              <div>
-                <span className="font-medium text-foreground/90">User agent:</span> {snap.ua}
-              </div>
-              <div className="mt-2">
-                <span className="font-medium text-foreground/90">Notes:</span>{" "}
-                If you’re inside Decent Wallet and this says “No injected provider”, your WebView injection is happening
-                too late. In Expo WebView, the provider must be injected with{" "}
-                <span className="text-foreground/90">injectedJavaScriptBeforeContentLoaded</span>.
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 export default function AppHome() {
-  const { isConnected } = useAccount();
+  const wagmi = useAccount();
+  const dw = useDecentWalletAccount();
+
+  // ✅ If inside Decent Wallet, trust injected provider connection
+  // ✅ Otherwise, use wagmi/rainbowkit connection
+  const isConnected = dw.isDecentWallet ? dw.isConnected : wagmi.isConnected;
 
   return (
     <div className="pt-10 sm:pt-14">
       <Container>
-        {/* Debug banner (temporary while we validate Decent Wallet injection) */}
-        <DebugBanner />
-
         {!isConnected ? (
-          <div className="mt-6 rounded-3xl border border-border bg-card p-8 sm:p-10">
+          <div className="rounded-3xl border border-border bg-card p-8 sm:p-10">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
               Connect once. Access everything.
             </h1>
@@ -261,7 +66,7 @@ export default function AppHome() {
             </div>
           </div>
         ) : (
-          <div className="mt-6 rounded-3xl border border-border bg-card p-8 sm:p-10">
+          <div className="rounded-3xl border border-border bg-card p-8 sm:p-10">
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
               Welcome to Decentroneum
             </h1>
