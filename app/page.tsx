@@ -8,6 +8,7 @@ import { Button } from "@/src/ui/Button";
 import { StoreButton } from "@/src/ui/StoreButtons";
 import { ScrollTo } from "@/src/ui/ScrollTo";
 import { SiteFooter } from "@/src/ui/SiteFooter";
+import { appUrlHref } from "@/src/lib/appEnv";
 
 
 const STORE = {
@@ -138,7 +139,7 @@ export default function HomePage() {
           <nav aria-label="Primary" className="flex items-center gap-2">
             {/* Make Launch D-App POP (glow + stronger contrast) */}
             <Button
-              href="/app"
+              href={appUrlHref("")}
               size="sm"
               className="
                 relative overflow-hidden rounded-full
@@ -185,7 +186,7 @@ export default function HomePage() {
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Button href="/app" size="lg">
+                <Button href={appUrlHref("")} size="lg">
                   Launch the D-App
                 </Button>
 
@@ -229,7 +230,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                    <Button href="/app" variant="secondary">
+                    <Button href={appUrlHref("")} variant="secondary">
                       Explore D-App
                     </Button>
                   </div>
