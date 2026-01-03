@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Container } from "@/src/ui/Container";
 import { FiChevronLeft } from "react-icons/fi";
 import { HiOutlineHome } from "react-icons/hi2";
-import { APP_BASE, appHref } from "@/src/lib/appEnv";
+import { APP_BASE, appHref, MAIN_SITE_URL } from "@/src/lib/appEnv";
 
 function prettySegment(seg: string) {
   return seg.replace(/[-_]/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
@@ -74,7 +74,7 @@ export function AppTopNav() {
 
         {/* Landing button is always / on the main site */}
         <Link
-          href="/"
+          href={MAIN_SITE_URL}
           className="
             inline-flex items-center gap-2 rounded-full
             border border-border bg-card px-3 h-9

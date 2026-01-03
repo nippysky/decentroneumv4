@@ -1,8 +1,13 @@
 // src/lib/appEnv.ts
-export const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE ?? "/app";
+export const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE ?? "";
+export const MAIN_SITE_URL =
+  process.env.NEXT_PUBLIC_MAIN_SITE_URL ?? "https://decentroneum.com";
+
+// If APP_BASE is "", APP_URL should be the app subdomain.
+// If APP_BASE is "/app", APP_URL should be main domain + /app.
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ??
-  (APP_BASE ? `https://decentroneum.com${APP_BASE}` : "https://app.decentroneum.com");
+  (APP_BASE ? `${MAIN_SITE_URL}${APP_BASE}` : "https://app.decentroneum.com");
 
 export function joinPath(base: string, path: string) {
   const b = (base || "").trim();
@@ -11,7 +16,7 @@ export function joinPath(base: string, path: string) {
   const b2 = b === "/" ? "" : b.replace(/\/+$/, "");
   const p2 = p.replace(/^\/+/, "");
 
-  if (!b2) return `/${p2}`;
+  if (!b2) return `/${p2}`.replace(/\/{2,}/g, "/");
   return `${b2}/${p2}`.replace(/\/{2,}/g, "/");
 }
 

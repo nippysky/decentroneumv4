@@ -5,6 +5,7 @@ import * as React from "react";
 import { Container } from "@/src/ui/Container";
 import { Button } from "@/src/ui/Button";
 import { useAppConnection } from "@/src/lib/useAppConnection";
+import { MAIN_SITE_URL } from "@/src/lib/appEnv";
 
 export function AppGate({ children }: { children: React.ReactNode }) {
   const { mounted, isConnected, isDecentWallet, connectDW } = useAppConnection();
@@ -62,7 +63,7 @@ export function AppGate({ children }: { children: React.ReactNode }) {
               Connect
             </Button>
 
-            <Button href="/" variant="ghost">
+            <Button href={MAIN_SITE_URL} variant="ghost">
               Back to landing
             </Button>
           </div>
