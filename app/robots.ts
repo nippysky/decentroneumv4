@@ -7,10 +7,15 @@ function isLocalhost(host: string) {
 }
 
 function canonicalSiteUrl(host: string, proto: string) {
+  // App subdomain stays on app.*
   if (host === "app.decentroneum.com") return "https://app.decentroneum.com";
+
+  // Any other decentroneum.* host canonicalizes to main site
   if (host === "decentroneum.com" || host.endsWith(".decentroneum.com")) {
     return "https://decentroneum.com";
   }
+
+  // Fallback (use current host/proto)
   return `${proto}://${host}`;
 }
 
@@ -40,17 +45,19 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     },
   ];
 
-  // On MAIN domain only: block /app from indexing (since it lives on app subdomain)
+  // MAIN domain only: block /app from indexing (since app lives on app subdomain)
   if (!isAppHost) {
     rules.push({
       userAgent: "*",
-      disallow: ["/app", "/app/"], // ✅ normal mutable array
+      disallow: ["/app", "/app/"],
     });
   }
 
   return {
     rules,
     sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
+
+    // ✅ Host should be hostname only (not "https://...")
+    host,
   };
 }
