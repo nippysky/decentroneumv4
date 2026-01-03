@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 
 import ConnectWallet from "@/src/ui/connectWallet";
 import { useDecentWalletAccount } from "@/src/lib/decentWallet";
@@ -17,7 +18,6 @@ async function copyToClipboard(text: string) {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    // fallback
     try {
       const el = document.createElement("textarea");
       el.value = text;
@@ -56,7 +56,7 @@ function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-100">
+    <div style={{ zIndex: 100}} className="fixed inset-0">
       <button
         aria-label="Close"
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -69,31 +69,115 @@ function Modal({
   );
 }
 
+function ToastPortal({
+  show,
+  message,
+}: {
+  show: boolean;
+  message: string;
+}) {
+  const [portalReady, setPortalReady] = React.useState(false);
+
+  React.useEffect(() => setPortalReady(true), []);
+  if (!portalReady) return null;
+
+  return createPortal(
+    <div
+    style={{ zIndex: 9999 }}
+      className={[
+        "pointer-events-none fixed left-1/2 bottom-6",
+        "-translate-x-1/2 transition duration-200",
+        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+      ].join(" ")}
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div
+        className="
+          rounded-full border border-border bg-card
+          px-4 py-2 text-xs font-semibold text-foreground
+          shadow-[0_18px_60px_rgba(0,0,0,0.22)]
+        "
+      >
+        {message}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export function WalletPill() {
   const dw = useDecentWalletAccount();
-  const [open, setOpen] = React.useState(false);
-  const [copied, setCopied] = React.useState(false);
 
-  // ✅ If we’re NOT inside Decent Wallet, just render Thirdweb’s ConnectButton
-  if (!dw.isDecentWallet) {
-    return <ConnectWallet />;
+  // ✅ Hydration guard hooks (must be declared unconditionally)
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
+  // Toast hooks (also unconditional)
+  const [toast, setToast] = React.useState<{ show: boolean; msg: string }>({
+    show: false,
+    msg: "",
+  });
+  const toastTimer = React.useRef<number | null>(null);
+
+  const showToast = React.useCallback((msg: string) => {
+    setToast({ show: true, msg });
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => {
+      setToast((t) => ({ ...t, show: false }));
+    }, 1800);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  // Modal state (unconditional)
+  const [open, setOpen] = React.useState(false);
+
+  // ✅ On SSR/first paint render a stable placeholder (prevents Thirdweb hydration mismatch)
+  if (!mounted) {
+    return (
+      <>
+        <div className="h-10 w-41.25 rounded-full border border-border bg-card/70" />
+        <ToastPortal show={toast.show} message={toast.msg} />
+      </>
+    );
   }
 
-  // ✅ Inside Decent Wallet: our own clean pill + dropdown
+  // ✅ If NOT inside Decent Wallet, render Thirdweb’s connect UI (client-only now)
+  if (!dw.isDecentWallet) {
+    return (
+      <>
+        <ConnectWallet />
+        <ToastPortal show={toast.show} message={toast.msg} />
+      </>
+    );
+  }
+
+  // ✅ Inside Decent Wallet
   if (!dw.ready) {
     return (
-      <div className="h-10 w-27.5 animate-pulse rounded-full border border-border bg-card" />
+      <>
+        <div className="h-10 w-27.5 animate-pulse rounded-full border border-border bg-card" />
+        <ToastPortal show={toast.show} message={toast.msg} />
+      </>
     );
   }
 
   if (!dw.isConnected || !dw.address) {
     return (
-      <button
-        onClick={() => dw.connect()}
-        className="h-10 rounded-full bg-accent px-4 text-sm font-semibold text-black hover:opacity-95 active:opacity-90"
-      >
-        Connect
-      </button>
+      <>
+        <button
+          onClick={() => dw.connect()}
+          className="h-10 rounded-full bg-accent px-4 text-sm font-semibold text-black hover:opacity-95 active:opacity-90"
+        >
+          Connect
+        </button>
+        <ToastPortal show={toast.show} message={toast.msg} />
+      </>
     );
   }
 
@@ -108,20 +192,11 @@ export function WalletPill() {
         <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
         <span className="tabular-nums">{shorten(address)}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" className="opacity-80">
-          <path
-            fill="currentColor"
-            d="M7 10l5 5l5-5z"
-          />
+          <path fill="currentColor" d="M7 10l5 5l5-5z" />
         </svg>
       </button>
 
-      <Modal
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          setCopied(false);
-        }}
-      >
+      <Modal open={open} onClose={() => setOpen(false)}>
         <div className="p-5">
           <div className="flex items-start justify-between">
             <div>
@@ -146,18 +221,18 @@ export function WalletPill() {
               <button
                 onClick={async () => {
                   const ok = await copyToClipboard(address);
-                  setCopied(ok);
-                  setTimeout(() => setCopied(false), 1200);
+                  showToast(ok ? "Address copied" : "Copy failed");
                 }}
                 className="flex-1 rounded-2xl border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-background/60"
               >
-                {copied ? "Copied!" : "Copy address"}
+                Copy address
               </button>
 
               <button
                 onClick={async () => {
                   await dw.disconnect();
                   setOpen(false);
+                  showToast("Disconnected");
                 }}
                 className="flex-1 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-500/15"
               >
@@ -167,6 +242,8 @@ export function WalletPill() {
           </div>
         </div>
       </Modal>
+
+      <ToastPortal show={toast.show} message={toast.msg} />
     </>
   );
 }

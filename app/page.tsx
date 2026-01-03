@@ -1,16 +1,14 @@
 // app/page.tsx
 import Link from "next/link";
+import Image from "next/image";
 import { FaApple, FaGooglePlay } from "react-icons/fa";
+
 import { Container } from "@/src/ui/Container";
 import { Button } from "@/src/ui/Button";
-import { ThemeToggle } from "@/src/ui/ThemeToggle";
 import { StoreButton } from "@/src/ui/StoreButtons";
 import { ScrollTo } from "@/src/ui/ScrollTo";
+import { SiteFooter } from "@/src/ui/SiteFooter";
 
-const SOCIALS = {
-  x: "https://x.com/decentroneum",
-  telegram: "https://t.me/DecentroneumGroupChat",
-};
 
 const STORE = {
   ios: "", // add App Store URL when available
@@ -19,16 +17,24 @@ const STORE = {
 
 function LogoMark() {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       <div
         className="
-          h-9 w-9 rounded-xl
-          bg-[radial-gradient(circle_at_30%_30%,color-mix(in_oklab,var(--accent)_55%,transparent),transparent_60%),linear-gradient(180deg,color-mix(in_oklab,var(--accent)_18%,transparent),transparent)]
-          border border-border
+          relative h-9 w-9 rounded-xl overflow-hidden
+          border border-border bg-card
+          shadow-[0_1px_0_rgba(255,255,255,0.06)]
         "
-        aria-hidden="true"
-      />
-      <span className="text-sm font-semibold tracking-tight">Decentroneum</span>
+      >
+        <Image
+          src="/DECENT-ICON.png"
+          alt="Decentroneum"
+          fill
+          sizes="36px"
+          className="object-cover"
+          priority
+        />
+      </div>
+      {/* icon-only as requested (no text) */}
     </div>
   );
 }
@@ -44,8 +50,12 @@ function Pill({ children }: { children: React.ReactNode }) {
 function SectionTitle({ title, desc }: { title: string; desc: string }) {
   return (
     <header className="max-w-3xl">
-      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">{title}</h2>
-      <p className="mt-3 text-sm sm:text-base text-muted leading-relaxed">{desc}</p>
+      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+        {title}
+      </h2>
+      <p className="mt-3 text-sm sm:text-base text-muted leading-relaxed">
+        {desc}
+      </p>
     </header>
   );
 }
@@ -74,24 +84,6 @@ function Card({
   );
 }
 
-function ExternalLink({ href, label }: { href: string; label: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="
-        inline-flex items-center justify-center rounded-full
-        border border-border bg-card px-4 h-11 text-sm font-medium
-        hover:border-foreground/20 hover:bg-card/80 transition
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
-      "
-    >
-      {label}
-    </a>
-  );
-}
-
 function DownloadCtaLabel() {
   return (
     <span className="inline-flex items-center gap-2">
@@ -112,6 +104,7 @@ function DownloadCtaLabel() {
 export default function HomePage() {
   return (
     <div className="min-h-screen">
+      {/* premium background glow */}
       <div
         aria-hidden="true"
         className="
@@ -134,13 +127,37 @@ export default function HomePage() {
 
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur">
         <Container className="h-16 flex items-center justify-between">
-          <Link href="/" className="hover:opacity-90" aria-label="Decentroneum home">
+          <Link
+            href="/"
+            className="hover:opacity-90"
+            aria-label="Decentroneum home"
+          >
             <LogoMark />
           </Link>
 
-          <nav aria-label="Primary">
-            <Button href="/app" variant="secondary" size="sm">
-              Launch D-App
+          <nav aria-label="Primary" className="flex items-center gap-2">
+            {/* Make Launch D-App POP (glow + stronger contrast) */}
+            <Button
+              href="/app"
+              size="sm"
+              className="
+                relative overflow-hidden rounded-full
+                border border-foreground/10
+                bg-primary text-background
+                shadow-[0_10px_30px_color-mix(in_oklab,var(--accent)_22%,transparent)]
+                hover:shadow-[0_14px_40px_color-mix(in_oklab,var(--accent)_28%,transparent)]
+                hover:opacity-[0.98]
+                focus-visible:ring-2 focus-visible:ring-accent/50
+              "
+            >
+              <span
+                aria-hidden="true"
+                className="
+                  pointer-events-none absolute inset-0
+                  bg-[radial-gradient(120px_60px_at_30%_10%,color-mix(in_oklab,var(--accent)_35%,transparent),transparent_60%)]
+                "
+              />
+              <span className="relative">Launch D-App</span>
             </Button>
           </nav>
         </Container>
@@ -162,8 +179,9 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-5 text-base sm:text-lg text-muted leading-relaxed max-w-3xl">
-                A clean, dependable place to access ecosystem utilities and community tools on the web —
-                with a non-custodial mobile wallet for secure self-custody and everyday use.
+                A clean, dependable place to access ecosystem utilities and
+                community tools on the web — with a non-custodial mobile wallet
+                for secure self-custody and everyday use.
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -172,7 +190,11 @@ export default function HomePage() {
                 </Button>
 
                 <ScrollTo targetId="download">
-                  <Button variant="secondary" size="lg" className="justify-between">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="justify-between"
+                  >
                     <DownloadCtaLabel />
                   </Button>
                 </ScrollTo>
@@ -188,15 +210,21 @@ export default function HomePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="rounded-2xl border border-border/80 bg-background p-4">
                       <div className="text-xs text-muted">Web App</div>
-                      <div className="mt-1 text-sm font-medium">Utilities and dApps</div>
+                      <div className="mt-1 text-sm font-medium">
+                        Utilities and dApps
+                      </div>
                     </div>
                     <div className="rounded-2xl border border-border/80 bg-background p-4">
                       <div className="text-xs text-muted">Sessions</div>
-                      <div className="mt-1 text-sm font-medium">Clear wallet connections</div>
+                      <div className="mt-1 text-sm font-medium">
+                        Clear wallet connections
+                      </div>
                     </div>
                     <div className="rounded-2xl border border-border/80 bg-background p-4">
                       <div className="text-xs text-muted">Performance</div>
-                      <div className="mt-1 text-sm font-medium">Responsive on any device</div>
+                      <div className="mt-1 text-sm font-medium">
+                        Responsive on any device
+                      </div>
                     </div>
                   </div>
 
@@ -238,9 +266,18 @@ export default function HomePage() {
             />
 
             <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card title="Clear UX" desc="Straightforward flows designed to reduce mistakes and improve confidence." />
-              <Card title="Robust foundations" desc="Built for stability, scalability, and clean integrations across the ecosystem." />
-              <Card title="Community distribution" desc="Updates and releases shared through official channels where the community already is." />
+              <Card
+                title="Clear UX"
+                desc="Straightforward flows designed to reduce mistakes and improve confidence."
+              />
+              <Card
+                title="Robust foundations"
+                desc="Built for stability, scalability, and clean integrations across the ecosystem."
+              />
+              <Card
+                title="Community distribution"
+                desc="Updates and releases shared through official channels where the community already is."
+              />
             </div>
           </Container>
         </section>
@@ -254,8 +291,9 @@ export default function HomePage() {
                     Decent Wallet for iOS and Android
                   </h2>
                   <p className="mt-3 text-sm sm:text-base text-muted leading-relaxed">
-                    A mobile-first, non-custodial wallet for secure access to the Electroneum ecosystem —
-                    designed for everyday use with a clean, modern experience.
+                    A mobile-first, non-custodial wallet for secure access to the
+                    Electroneum ecosystem — designed for everyday use with a
+                    clean, modern experience.
                   </p>
                 </div>
 
@@ -274,45 +312,8 @@ export default function HomePage() {
           </Container>
         </section>
 
-        <section className="pt-16 sm:pt-24 pb-20">
-          <Container>
-            <div className="rounded-3xl border border-border bg-card p-8 sm:p-10">
-              <SectionTitle
-                title="Stay connected"
-                desc="Follow announcements, releases, and ecosystem updates through the official community channels."
-              />
-
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <ExternalLink href={SOCIALS.x} label="Follow on X" />
-                <ExternalLink href={SOCIALS.telegram} label="Join Telegram" />
-                <Button href="/app" variant="secondary">
-                  Launch D-App
-                </Button>
-              </div>
-
-              <footer className="mt-10 border-t border-border/70 pt-6">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                  <div className="text-xs text-muted">
-                    © {new Date().getFullYear()} Decentroneum. All rights reserved.
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                    <div className="flex items-center gap-4 text-xs">
-                      <Link className="text-muted hover:text-foreground transition" href="/app">
-                        Web App
-                      </Link>
-                      <ScrollTo targetId="download" className="text-muted hover:text-foreground transition text-xs">
-                        Wallet
-                      </ScrollTo>
-                    </div>
-
-                    <ThemeToggle />
-                  </div>
-                </div>
-              </footer>
-            </div>
-          </Container>
-        </section>
+        {/* Shared Footer */}
+        <SiteFooter />
       </main>
     </div>
   );

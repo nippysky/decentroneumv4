@@ -137,3 +137,37 @@ body > [data-rk] {
   display: flex;
   flex-direction: column;
 }
+
+
+
+/* =========================
+   Subtle shimmer (for loading buttons)
+   ========================= */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--accent) 18%, transparent),
+    transparent
+  );
+  animation: shimmer 1.25s ease-in-out infinite;
+  pointer-events: none;
+}
