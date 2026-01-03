@@ -2,35 +2,55 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
-export const revalidate = 86400; // cache for 24h
+function isLocalhost(host: string) {
+  return host.includes("localhost") || host.startsWith("127.0.0.1");
+}
 
-async function getOrigin() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "decentroneum.com";
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  return `${proto}://${host}`.replace(/\/+$/, "");
+function canonicalSiteUrl(host: string, proto: string) {
+  if (host === "app.decentroneum.com") return "https://app.decentroneum.com";
+  if (host === "decentroneum.com" || host.endsWith(".decentroneum.com")) {
+    return "https://decentroneum.com";
+  }
+  return `${proto}://${host}`;
 }
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const origin = await getOrigin();
-  const host = new URL(origin).host.toLowerCase();
-  const isAppHost = host.startsWith("app.");
+  const h = await headers();
+
+  const host =
+    (h.get("x-forwarded-host") ?? h.get("host") ?? "decentroneum.com")
+      .split(",")[0]
+      .trim()
+      .toLowerCase();
+
+  const proto =
+    (h.get("x-forwarded-proto") ?? (isLocalhost(host) ? "http" : "https"))
+      .split(",")[0]
+      .trim()
+      .toLowerCase();
+
+  const siteUrl = canonicalSiteUrl(host, proto);
+  const isAppHost = host === "app.decentroneum.com" || host.startsWith("app.");
+
+  const rules: MetadataRoute.Robots["rules"] = [
+    {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/api/", "/_next/"],
+    },
+  ];
+
+  // On MAIN domain only: block /app from indexing (since it lives on app subdomain)
+  if (!isAppHost) {
+    rules.push({
+      userAgent: "*",
+      disallow: ["/app", "/app/"], // ✅ normal mutable array
+    });
+  }
 
   return {
-    rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: isAppHost
-          ? ["/api/", "/_next/"]
-          : [
-              "/api/",
-              "/_next/",
-              "/app/", // ✅ keep app routes off main-domain indexing
-            ],
-      },
-    ],
-    sitemap: `${origin}/sitemap.xml`,
-    host: origin,
+    rules,
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }
