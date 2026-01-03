@@ -2,7 +2,8 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
-export const revalidate = 60 * 60 * 24; // refresh once per day
+export const revalidate = 86400; // ✅ 24 hours
+
 
 function isLocalhost(host: string) {
   return host.includes("localhost") || host.startsWith("127.0.0.1");
