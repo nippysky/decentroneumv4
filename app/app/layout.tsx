@@ -2,12 +2,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { WalletPill } from "@/src/ui/WalletPill";
+
 import { Container } from "@/src/ui/Container";
 import { AppTopNav } from "@/src/ui/AppTopNav";
 import { APP_URL, appHref } from "@/src/lib/appEnv";
 import { AppGate } from "./AppGate";
 import { SiteFooter } from "@/src/ui/SiteFooter";
+import WalletPill from "@/src/ui/WalletPill";
 
 export const metadata: Metadata = {
   title: {

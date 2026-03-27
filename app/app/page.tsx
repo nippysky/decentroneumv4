@@ -4,12 +4,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { Container } from "@/src/ui/Container";
-import { WalletPill } from "@/src/ui/WalletPill";
 import { DECENT_APPS } from "@/src/lib/decentApps";
 import { useDecentWalletAccount } from "@/src/lib/decentWallet";
 import { useActiveAccount } from "thirdweb/react";
 import { FiSearch } from "react-icons/fi";
 import { HiOutlineArrowTopRightOnSquare } from "react-icons/hi2";
+import WalletPill from "@/src/ui/WalletPill";
 
 function ShellCard({
   children,
