@@ -46,11 +46,4 @@ export const DECENT_APPS: DecentApp[] = [
     href: appHref("decent-giver"),
     tag: "Community",
   },
-  {
-    title: "Panthart",
-    desc: "NFT marketplace for the Electroneum ecosystem.",
-    href: "https://panth.art",
-    external: true,
-    tag: "NFTs",
-  },
 ];
