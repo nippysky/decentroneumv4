@@ -1,4 +1,4 @@
-// src/lib/chain.ts
+// src/lib/chain/networks.ts
 import { defineChain } from "thirdweb";
 
 export const electroneumChain = defineChain({

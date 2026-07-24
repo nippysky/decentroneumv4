@@ -2,7 +2,6 @@
 import type { Metadata, Viewport } from "next";
 import { Lexend } from "next/font/google";
 import Script from "next/script";
-import "@rainbow-me/rainbowkit/styles.css";
 import "./globals.css";
 import { Providers } from "./providers";
 

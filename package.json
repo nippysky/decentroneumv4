@@ -6,10 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^2.2.10",
     "@tanstack/react-query": "^5.90.16",
     "ethers": "^6.16.0",
     "framer-motion": "^12.38.0",
@@ -18,9 +18,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-icons": "^5.5.0",
-    "thirdweb": "^5.116.1",
-    "viem": "^2.43.4",
-    "wagmi": "^2.19.5"
+    "thirdweb": "^5.116.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

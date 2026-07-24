@@ -21,6 +21,7 @@ import { useAppToast } from "@/src/ui/app/useAppToast";
 import { useTxState } from "@/src/ui/app/useTxState";
 import { useAppConnection } from "@/src/lib/useAppConnection";
 import { LoadingSpinner } from "@/src/ui/LoadingSpinner";
+import { shorten } from "@/src/lib/format";
 
 /**
  * Revoker (revamp)
@@ -128,11 +129,6 @@ interface CacheShape {
 /* -----------------------------
  * Helpers
  * ----------------------------- */
-function shorten(addr: string) {
-  if (!addr) return "";
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
-
 function key(chainId: string, address: string) {
   return `revoker:v1:${chainId}:${address}`;
 }
@@ -296,7 +292,7 @@ function Pill({
     tone === "danger"
       ? "bg-red-500/10 text-red-500 border-red-500/20"
       : tone === "success"
-      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+      ? "bg-success/10 text-success border-success/20"
       : "bg-card text-foreground/80 border-border";
 
   return (

@@ -16,6 +16,8 @@ import { useAppToast } from "@/src/ui/app/useAppToast";
 import { useTxState } from "@/src/ui/app/useTxState";
 import { useAppConnection } from "@/src/lib/useAppConnection";
 import { decentDonationABI, decentDonationCA } from "@/src/lib/requisites";
+import { getProviderOrThrow } from "@/src/lib/chain";
+import { shortErr } from "@/src/lib/format";
 
 const EXPLORER_ADDR = "https://blockexplorer.electroneum.com/address/";
 const EXPLORER_TX = "https://blockexplorer.electroneum.com/tx/";
@@ -95,18 +97,6 @@ async function safeCopy(text: string) {
       return false;
     }
   }
-}
-
-function shortErr(e: unknown) {
-  if (!e) return "Transaction failed";
-  if (typeof e === "string") return e;
-  const maybe = e as { shortMessage?: string; message?: string; reason?: string };
-  return maybe.shortMessage || maybe.reason || maybe.message || "Transaction failed";
-}
-
-async function getProviderOrThrow() {
-  if (!window.ethereum) throw new Error("Wallet provider not found");
-  return new ethers.BrowserProvider(window.ethereum);
 }
 
 function ProgressBar({ value }: { value: number }) {

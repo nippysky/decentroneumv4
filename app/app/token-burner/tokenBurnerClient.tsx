@@ -14,17 +14,13 @@ import { useAppToast } from "@/src/ui/app/useAppToast";
 import { useTxState } from "@/src/ui/app/useTxState";
 import { useAppConnection } from "@/src/lib/useAppConnection";
 import { LoadingSpinner } from "@/src/ui/LoadingSpinner";
+import { ERC20_ABI, getProviderOrThrow } from "@/src/lib/chain";
+import { prettyNumber, shorten, shortErr } from "@/src/lib/format";
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 const EXPLORER_TX = "https://blockexplorer.electroneum.com/tx/";
 
-const ERC20_MIN_ABI = [
-  "function name() view returns (string)",
-  "function symbol() view returns (string)",
-  "function decimals() view returns (uint8)",
-  "function balanceOf(address) view returns (uint256)",
-  "function transfer(address to, uint256 amount) returns (bool)",
-] as const;
+const ERC20_MIN_ABI = ERC20_ABI;
 
 type TokenMeta = {
   address: string; // checksum
@@ -46,35 +42,12 @@ function clampNumericInput(raw: string) {
   return v;
 }
 
-function prettyNumber(n: string, maxFrac = 6) {
-  const x = Number(n);
-  if (!Number.isFinite(x)) return n;
-  return x.toLocaleString(undefined, { maximumFractionDigits: maxFrac });
-}
-
 function formatUnitsSafe(v: bigint, decimals: number) {
   try {
     return ethers.formatUnits(v, decimals);
   } catch {
     return v.toString();
   }
-}
-
-function shorten(addr: string) {
-  if (!addr) return "";
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
-
-async function getProviderOrThrow() {
-  if (!window.ethereum) throw new Error("Wallet provider not found");
-  return new ethers.BrowserProvider(window.ethereum);
-}
-
-function shortErr(e: unknown) {
-  if (!e) return "Transaction failed";
-  if (typeof e === "string") return e;
-  const maybe = e as { shortMessage?: string; message?: string; reason?: string };
-  return maybe.shortMessage || maybe.reason || maybe.message || "Transaction failed";
 }
 
 export default function TokenBurnerClient() {

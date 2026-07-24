@@ -81,11 +81,19 @@ export async function dwRequestAccounts(): Promise<string[]> {
 }
 
 /**
- * “Disconnect” for injected wallets is not standardized.
- * We do best-effort:
- * - try wallet_revokePermissions (MetaMask-ish)
- * - try wallet_requestPermissions empty
- * - then clear shared local address state as a UX fallback.
+ * “Disconnect” for injected wallets is not standardized, so we try the
+ * available methods in order of how authoritative they are:
+ *
+ *  1. `dw_disconnect` — Decent Wallet's own method. This is the ONLY one
+ *     that actually revokes the site's permission inside the native app.
+ *     Without it, the site would clear its own UI while the wallet still
+ *     considered this domain connected — so re-opening the page would
+ *     silently reconnect, and the user would think disconnect was broken.
+ *  2. `wallet_revokePermissions` — MetaMask and similar.
+ *  3. `wallet_requestPermissions` — older fallback.
+ *
+ * Local state is cleared regardless, so the UI is always consistent even
+ * if the wallet refuses or doesn't implement any of them.
  */
 export async function dwDisconnect(): Promise<void> {
   const eth = getEthereum();
@@ -94,19 +102,22 @@ export async function dwDisconnect(): Promise<void> {
     return;
   }
 
-  try {
-    await eth.request({
-      method: "wallet_revokePermissions",
-      params: [{ eth_accounts: {} }],
-    });
-  } catch {
+  const attempts: { method: string; params?: any[] }[] = [];
+
+  // Only Decent Wallet implements dw_disconnect — try it first when we're
+  // actually running inside it.
+  if (eth.isDecentWallet) {
+    attempts.push({ method: "dw_disconnect" });
+  }
+  attempts.push({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] });
+  attempts.push({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
+
+  for (const attempt of attempts) {
     try {
-      await eth.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }],
-      });
+      await eth.request(attempt);
+      break; // first one that succeeds is enough
     } catch {
-      // ignore
+      // try the next strategy
     }
   }
 
@@ -117,7 +128,47 @@ export function useDecentWalletAccount() {
   const [ready, setReady] = React.useState(false);
   const [address, setAddress] = React.useState<string | null>(null);
 
-  const eth = React.useMemo(() => getEthereum(), []);
+  // The injected provider is NOT reliably present on first render:
+  //  • during SSR there is no `window` at all;
+  //  • inside the mobile app the provider is injected before page scripts,
+  //    but the underlying RN bridge can attach a beat later.
+  // Detecting once at mount would therefore sometimes conclude "not Decent
+  // Wallet" permanently and fall back to the generic connect flow while
+  // running *inside* Decent Wallet. So we poll briefly until it appears.
+  const [eth, setEth] = React.useState<Eip1193Provider | null>(null);
+
+  React.useEffect(() => {
+    const found = getEthereum();
+    if (found) {
+      setEth(found);
+      return;
+    }
+
+    let cancelled = false;
+    let elapsed = 0;
+    const STEP = 50;
+    const MAX_WAIT = 2000;
+
+    const timer = setInterval(() => {
+      if (cancelled) return;
+      const p = getEthereum();
+      elapsed += STEP;
+      if (p) {
+        setEth(p);
+        clearInterval(timer);
+      } else if (elapsed >= MAX_WAIT) {
+        // Genuinely no injected wallet — stop burning cycles.
+        clearInterval(timer);
+        setReady(true);
+      }
+    }, STEP);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, []);
+
   const isDW = !!eth?.isDecentWallet;
 
   React.useEffect(() => {
@@ -129,6 +180,9 @@ export function useDecentWalletAccount() {
         setAddress(stored);
       }
 
+      // Wait for provider detection to settle before asking for accounts.
+      if (!eth) return;
+
       const accounts = await dwGetAccounts();
       if (!alive) return;
 
@@ -139,7 +193,7 @@ export function useDecentWalletAccount() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [eth]);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;

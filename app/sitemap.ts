@@ -35,7 +35,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const isAppHost = host === "app.decentroneum.com" || host.startsWith("app.");
 
   // MAIN DOMAIN URLs (marketing / public)
-  const mainRoutes = ["/"];
+  // Legal pages are indexed deliberately: app store reviewers and users
+  // both need to be able to find them from search, not just from the footer.
+  const mainRoutes = ["/", "/tokens/submit", "/privacy", "/terms"];
 
   // APP SUBDOMAIN URLs (your /app/* routes, but without exposing /app in public URLs)
   // Because proxy rewrites app.decentroneum.com/* -> /app/*

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Container } from "@/src/ui/Container";
 import { ThemeToggle } from "@/src/ui/ThemeToggle";
 import { FaTelegramPlane } from "react-icons/fa";
@@ -54,7 +55,7 @@ function SocialButton({
           border border-border bg-card
           transition
           group-hover:border-foreground/15
-          group-hover:shadow-[0_8px_28px_color-mix(in_oklab,var(--accent)_18%,transparent)]
+          group-hover:shadow-[0_8px_28px_color-mix(in_oklab,var(--glow)_18%,transparent)]
         "
         aria-hidden="true"
       >
@@ -98,8 +99,31 @@ export function SiteFooter() {
 
           <footer className="mt-10 border-t border-border/70 pt-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="text-xs text-muted" suppressHydrationWarning>
-                © {year} Decentroneum. All rights reserved.
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+                <div className="text-xs text-muted" suppressHydrationWarning>
+                  © {year} Decentroneum. All rights reserved.
+                </div>
+
+                <nav className="flex items-center gap-5 text-xs">
+                  <Link
+                    href="/tokens/submit"
+                    className="text-muted transition hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
+                  >
+                    Submit a token
+                  </Link>
+                  <Link
+                    href="/privacy"
+                    className="text-muted transition hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    href="/terms"
+                    className="text-muted transition hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
+                  >
+                    Terms of Service
+                  </Link>
+                </nav>
               </div>
 
               <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">

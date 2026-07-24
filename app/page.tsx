@@ -9,12 +9,29 @@ import { StoreButton } from "@/src/ui/StoreButtons";
 import { ScrollTo } from "@/src/ui/ScrollTo";
 import { SiteFooter } from "@/src/ui/SiteFooter";
 import { appUrlHref } from "@/src/lib/appEnv";
+import { DECENT_APPS } from "@/src/lib/decentApps";
 
 
 const STORE = {
   ios: "", // add App Store URL when available
   android: "", // add Play Store URL when available
 };
+
+/**
+ * How many dApps get a full card on the marketing page.
+ *
+ * The suite is expected to keep growing, so the homepage shows a fixed
+ * number of cards and folds everything else into a single "explore" tile.
+ * That keeps this section a constant height and a constant amount of
+ * reading, whether there are 6 dApps or 60 — and means adding a dApp needs
+ * no edit here at all.
+ */
+const FEATURED_COUNT = 5;
+
+const FEATURED_APPS = DECENT_APPS.slice(0, FEATURED_COUNT);
+const REMAINING_APPS = DECENT_APPS.slice(FEATURED_COUNT);
+const REMAINING_COUNT = REMAINING_APPS.length;
+const TOTAL_APPS = DECENT_APPS.length;
 
 function LogoMark() {
   return (
@@ -110,8 +127,8 @@ export default function HomePage() {
         aria-hidden="true"
         className="
           pointer-events-none fixed inset-0
-          bg-[radial-gradient(900px_520px_at_20%_-10%,color-mix(in_oklab,var(--accent)_16%,transparent),transparent_60%),
-              radial-gradient(700px_460px_at_90%_10%,color-mix(in_oklab,var(--accent)_10%,transparent),transparent_55%)]
+          bg-[radial-gradient(900px_520px_at_20%_-10%,color-mix(in_oklab,var(--glow)_16%,transparent),transparent_60%),
+              radial-gradient(700px_460px_at_90%_10%,color-mix(in_oklab,var(--glow)_10%,transparent),transparent_55%)]
         "
       />
 
@@ -145,8 +162,8 @@ export default function HomePage() {
                 relative overflow-hidden rounded-full
                 border border-foreground/10
                 bg-primary text-background
-                shadow-[0_10px_30px_color-mix(in_oklab,var(--accent)_22%,transparent)]
-                hover:shadow-[0_14px_40px_color-mix(in_oklab,var(--accent)_28%,transparent)]
+                shadow-[0_10px_30px_color-mix(in_oklab,var(--glow)_22%,transparent)]
+                hover:shadow-[0_14px_40px_color-mix(in_oklab,var(--glow)_28%,transparent)]
                 hover:opacity-[0.98]
                 focus-visible:ring-2 focus-visible:ring-accent/50
               "
@@ -155,7 +172,7 @@ export default function HomePage() {
                 aria-hidden="true"
                 className="
                   pointer-events-none absolute inset-0
-                  bg-[radial-gradient(120px_60px_at_30%_10%,color-mix(in_oklab,var(--accent)_35%,transparent),transparent_60%)]
+                  bg-[radial-gradient(120px_60px_at_30%_10%,color-mix(in_oklab,var(--glow)_35%,transparent),transparent_60%)]
                 "
               />
               <span className="relative">Launch D-App</span>
@@ -180,9 +197,10 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-5 text-base sm:text-lg text-muted leading-relaxed max-w-3xl">
-                A clean, dependable place to access ecosystem utilities and
-                community tools on the web — with a non-custodial mobile wallet
-                for secure self-custody and everyday use.
+                Create tokens, send to thousands of wallets at once, lock
+                supply, revoke risky approvals — and more arriving all the
+                time. Plus a non-custodial mobile wallet where you hold your
+                own keys. No sign-up, no custody.
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -255,6 +273,115 @@ export default function HomePage() {
                   </ScrollTo>
                 </div>
               </Card>
+            </div>
+          </Container>
+        </section>
+
+        {/* A *taste* of the dApps, not a catalogue.
+            The suite is meant to keep growing, so this section deliberately
+            never claims to be the full list: it shows a few cards, names the
+            rest as lightweight chips, and pushes people into the D-App to
+            explore properly. Everything is derived from DECENT_APPS, so
+            adding a new dApp updates the count, the chips and the CTA with
+            no edits here — and the section's height stays constant no matter
+            how large the suite gets. */}
+        <section id="tools" className="pt-16 sm:pt-24">
+          <Container>
+            <SectionTitle
+              title="A growing suite of on-chain tools"
+              desc="Practical utilities for the Electroneum Smart Chain — with more shipping over time. No sign-up, no custody: connect your wallet and go."
+            />
+
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {FEATURED_APPS.map((app) => (
+                <Link
+                  key={app.title}
+                  /* DECENT_APPS.href is a path relative to the *app*
+                     subdomain (e.g. "/token-creator"). Linking to it raw
+                     from this marketing page resolves against
+                     decentroneum.com, which has no such route — that's the
+                     404. appUrlHref() promotes it to the absolute
+                     app.decentroneum.com URL. */
+                  href={appUrlHref(app.href)}
+                  className="
+                    group rounded-3xl border border-border bg-card p-6
+                    shadow-[0_1px_0_rgba(255,255,255,0.06)]
+                    transition
+                    hover:border-foreground/15
+                    hover:shadow-[0_16px_44px_color-mix(in_oklab,var(--glow)_12%,transparent)]
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
+                  "
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-lg font-semibold tracking-tight">{app.title}</h3>
+                    {app.tag ? (
+                      <span className="shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted">
+                        {app.tag}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <p className="mt-2 text-sm text-muted leading-relaxed">{app.desc}</p>
+
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+                    Open
+                    <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </span>
+                </Link>
+              ))}
+
+              {/* Explore-all tile — grows in weight as the suite grows,
+                  instead of the grid growing in length. */}
+              <Link
+                href={appUrlHref("")}
+                className="
+                  group relative overflow-hidden rounded-3xl border border-border bg-card p-6
+                  flex flex-col justify-between
+                  shadow-[0_1px_0_rgba(255,255,255,0.06)]
+                  transition hover:border-foreground/15
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
+                "
+              >
+                <span
+                  aria-hidden="true"
+                  className="
+                    pointer-events-none absolute inset-0
+                    bg-[radial-gradient(220px_120px_at_80%_0%,color-mix(in_oklab,var(--glow)_16%,transparent),transparent_70%)]
+                  "
+                />
+                <div className="relative">
+                  <h3 className="text-lg font-semibold tracking-tight">
+                    {REMAINING_COUNT > 0
+                      ? `+${REMAINING_COUNT} more tool${REMAINING_COUNT === 1 ? "" : "s"}`
+                      : "Explore the D-App"}
+                  </h3>
+                  <p className="mt-2 text-sm text-muted leading-relaxed">
+                    {TOTAL_APPS} live today, and the suite keeps growing.
+                  </p>
+
+                  {REMAINING_APPS.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {REMAINING_APPS.map((app) => (
+                        <span
+                          key={app.title}
+                          className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted"
+                        >
+                          {app.title}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <span className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+                  Explore all
+                  <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </span>
+              </Link>
             </div>
           </Container>
         </section>

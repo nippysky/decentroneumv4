@@ -19,6 +19,8 @@ import {
 } from "@/src/lib/requisites";
 import { AppCard } from "@/src/ui/app/AppCard";
 import { LoadingSpinner } from "@/src/ui/LoadingSpinner";
+import { getProviderOrThrow } from "@/src/lib/chain";
+import { prettyNumber, shortErr } from "@/src/lib/format";
 
 /**
  * Bulk Sender
@@ -93,19 +95,8 @@ function formatUnitsSafe(v: bigint, decimals: number) {
   }
 }
 
-function prettyNumber(s: string, maxFrac = 6) {
-  const n = Number(s);
-  if (!Number.isFinite(n)) return s;
-  return n.toLocaleString(undefined, { maximumFractionDigits: maxFrac });
-}
-
 async function readFileText(file: File) {
   return await file.text();
-}
-
-async function getProviderOrThrow() {
-  if (!window.ethereum) throw new Error("Wallet provider not found");
-  return new ethers.BrowserProvider(window.ethereum);
 }
 
 async function safeApproveExact(
@@ -123,15 +114,6 @@ async function safeApproveExact(
     const tx1 = await token.approve(spender, amount);
     await tx1.wait();
   }
-}
-
-function shortErr(e: unknown) {
-  if (!e) return "Transaction failed";
-  if (typeof e === "string") return e;
-
-  // ethers v6 error shapes vary
-  const maybe = e as { shortMessage?: string; message?: string; reason?: string };
-  return maybe.shortMessage || maybe.reason || maybe.message || "Transaction failed";
 }
 
 export default function BulkSenderClient() {

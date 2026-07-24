@@ -16,9 +16,22 @@
   --card: #ffffff;
 
   --primary: #0b1220;
-  --accent: #4dee54;
-  --success: #4dee54;
+
+  /* Brand green, inverted for light mode.
+     The neon (#4dee54) scores just 1.44:1 against this cream background —
+     far under the 4.5:1 WCAG AA minimum — so as link/label text it was
+     both hard to read and visually shrill. This is the same brand hue
+     (122.6°) taken down in lightness: 5.56:1 on the page background,
+     5.94:1 on white cards. The neon is kept for dark mode, where it
+     scores 13:1 and looks the way it's supposed to. */
+  --accent: #117415;
+  --success: #117415;
   --danger: #ef4444;
+
+  /* Decorative-only brand green. Used for ambient glows and soft shadows
+     at low opacity, where the neon still reads as a warm brand wash rather
+     than as text. Never use this for anything that must be legible. */
+  --glow: #4dee54;
 
   color-scheme: light;
 }
@@ -32,10 +45,13 @@
   --border: #1b1f1c;
   --card: #0b0f0c;
 
+  /* Dark mode is where the neon belongs — 13:1 against this background. */
   --primary: #4dee54;
   --accent: #4dee54;
   --success: #4dee54;
   --danger: #f87171;
+
+  --glow: #4dee54;
 
   color-scheme: dark;
 }
@@ -56,6 +72,7 @@
   --color-accent: var(--accent);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-glow: var(--glow);
 
   /* Brand font from next/font variable set on <html> */
   --font-sans: var(--font-lexend);
@@ -87,7 +104,7 @@ body {
    Micro-interactions
    ========================= */
 ::selection {
-  background: color-mix(in oklab, var(--accent) 28%, transparent);
+  background: color-mix(in oklab, var(--glow) 28%, transparent);
 }
 
 @keyframes fadeUp {
@@ -165,9 +182,32 @@ body > [data-rk] {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in oklab, var(--accent) 18%, transparent),
+    color-mix(in oklab, var(--glow) 18%, transparent),
     transparent
   );
   animation: shimmer 1.25s ease-in-out infinite;
   pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Legal pages (/privacy, /terms)
+   Long-form text needs a slightly wider measure and calmer rhythm than the
+   marketing sections, plus consistent link styling for inline references.
+   --------------------------------------------------------------------------- */
+.legal-prose a:not([class]) {
+  color: var(--foreground);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--border);
+  transition: text-decoration-color 0.15s ease;
+}
+
+.legal-prose a:not([class]):hover {
+  text-decoration-color: var(--foreground);
+}
+
+.legal-prose strong {
+  color: var(--foreground);
+  font-weight: 600;
 }

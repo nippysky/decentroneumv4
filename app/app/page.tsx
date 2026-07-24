@@ -5,8 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Container } from "@/src/ui/Container";
 import { DECENT_APPS } from "@/src/lib/decentApps";
-import { useDecentWalletAccount } from "@/src/lib/decentWallet";
-import { useActiveAccount } from "thirdweb/react";
+import { useAppConnection } from "@/src/lib/useAppConnection";
 import { FiSearch } from "react-icons/fi";
 import { HiOutlineArrowTopRightOnSquare } from "react-icons/hi2";
 import WalletPill from "@/src/ui/WalletPill";
@@ -104,10 +103,9 @@ function AppTile({
 }
 
 export default function AppHome() {
-  const dw = useDecentWalletAccount();
-  const twAccount = useActiveAccount();
-
-  const isConnected = dw.isDecentWallet ? dw.isConnected : !!twAccount;
+  // Read from the one shared wallet source rather than re-deriving
+  // connection state locally.
+  const { isConnected } = useAppConnection();
 
   const [query, setQuery] = React.useState("");
 

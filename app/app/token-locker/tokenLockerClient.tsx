@@ -16,6 +16,8 @@ import { LoadingSpinner } from "@/src/ui/LoadingSpinner";
 import { useAppConnection } from "@/src/lib/useAppConnection";
 
 import { decentLockABI, decentLockerCA } from "@/src/lib/requisites";
+import { getProviderOrThrow } from "@/src/lib/chain";
+import { prettyNumber, shortErr } from "@/src/lib/format";
 
 /**
  * Token Locker (revamp)
@@ -84,30 +86,12 @@ function sanitizeDecimal(raw: string, maxDecimals = 18) {
   return s;
 }
 
-function shortErr(e: unknown) {
-  if (!e) return "Something went wrong";
-  if (typeof e === "string") return e;
-  const maybe = e as { shortMessage?: string; message?: string; reason?: string };
-  return maybe.shortMessage || maybe.reason || maybe.message || "Something went wrong";
-}
-
 function formatUnitsSafe(v: bigint, decimals: number) {
   try {
     return ethers.formatUnits(v, decimals);
   } catch {
     return v.toString();
   }
-}
-
-function prettyNumber(s: string, maxFrac = 6) {
-  const n = Number(s);
-  if (!Number.isFinite(n)) return s;
-  return n.toLocaleString(undefined, { maximumFractionDigits: maxFrac });
-}
-
-async function getProviderOrThrow() {
-  if (!window.ethereum) throw new Error("Wallet provider not found");
-  return new ethers.BrowserProvider(window.ethereum);
 }
 
 async function safeApproveExact(token: ethers.Contract, spender: string, amount: bigint) {
@@ -692,7 +676,7 @@ export default function TokenLockerClient() {
                                   inline-flex items-center rounded-full border px-3 h-9 text-xs font-semibold
                                   ${
                                     cd.done
-                                      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+                                      ? "border-success/20 bg-success/10 text-success"
                                       : "border-border bg-card text-foreground/80"
                                   }
                                 `}

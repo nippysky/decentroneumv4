@@ -66,8 +66,8 @@ function ThirdwebDropdown({
     >
       <div className="px-4 pt-4 pb-3 border-b border-border">
         <div className="flex items-center gap-2 mb-2">
-          <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+          <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
+            <div className="h-2 w-2 rounded-full bg-accent" />
           </div>
           <div>
             <p className="text-xs text-muted font-medium">Connected Wallet</p>
@@ -179,12 +179,12 @@ export default function ConnectWallet() {
             border border-border bg-card
             text-sm font-semibold text-foreground
             hover:bg-background/60 transition-all
-            ${isOpen ? "ring-2 ring-emerald-500/50" : ""}
+            ${isOpen ? "ring-2 ring-accent/50" : ""}
           `}
         >
           <div className="relative">
-            <div className="h-2 w-2 rounded-full bg-emerald-400" />
-            <div className="absolute inset-0 h-2 w-2 rounded-full bg-emerald-400 animate-ping opacity-75" />
+            <div className="h-2 w-2 rounded-full bg-accent" />
+            <div className="absolute inset-0 h-2 w-2 rounded-full bg-accent animate-ping opacity-75" />
           </div>
           <span>{label}</span>
           <svg
@@ -221,7 +221,15 @@ export default function ConnectWallet() {
         whileTap={{ scale: 0.98 }}
         onClick={connectDW}
         disabled={!dw.ready}
-        className="h-10 rounded-full bg-linear-to-r from-emerald-500 to-emerald-600 px-5 text-sm font-semibold text-white shadow-lg hover:shadow-emerald-500/25 transition-shadow disabled:opacity-60 disabled:cursor-not-allowed"
+        className="
+            h-10 rounded-full px-5 text-sm font-semibold
+            bg-primary text-background
+            shadow-[0_10px_30px_color-mix(in_oklab,var(--glow)_22%,transparent)]
+            hover:shadow-[0_14px_40px_color-mix(in_oklab,var(--glow)_28%,transparent)]
+            transition-shadow
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
       >
         {dw.ready ? "Connect Wallet" : "Loading..."}
       </motion.button>

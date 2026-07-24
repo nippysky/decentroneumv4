@@ -13,7 +13,7 @@ const base =
 const variants: Record<Variant, string> = {
   primary:
     "bg-primary text-background border border-primary " +
-    "shadow-[0_12px_40px_color-mix(in_oklab,var(--accent)_20%,transparent)] " +
+    "shadow-[0_12px_40px_color-mix(in_oklab,var(--glow)_20%,transparent)] " +
     "hover:opacity-[0.96]",
   secondary:
     "bg-card text-foreground border border-border " +
