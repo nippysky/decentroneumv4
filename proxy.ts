@@ -6,6 +6,13 @@ function isStaticOrInternal(pathname: string) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/favicon") ||
+    // Universal-link verification files MUST be served from the host that
+    // was requested, unrewritten. Note that
+    // `/.well-known/apple-app-site-association` has no file extension, so
+    // the extension check below does NOT catch it — without this branch the
+    // app subdomain would rewrite it to /app/.well-known/... and 404, and
+    // iOS universal links would silently never verify.
+    pathname.startsWith("/.well-known") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml"
   ) {
