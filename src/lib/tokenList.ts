@@ -37,6 +37,19 @@ export const TOKEN_LIST: TokenEntry[] = [
       "https://static.electroswap.io/launchpad/presales/0x34b0dde73Ce7Dc241444B2d8A6Fe3dcB44c5FbEC_logo.webp",
     status: "approved",
   },
+  {
+    // Verified on-chain 2026-07-25 via the Electroneum block explorer:
+    // name "ElectroSwap", symbol "BOLT", decimals 18, ERC-20,
+    // total supply 100,000,000. Address is checksummed.
+    address: "0x043fAa1b5C5FC9a7dc35171f290c29ECDE0cCff1",
+    symbol: "BOLT",
+    name: "ElectroSwap",
+    decimals: 18,
+    // CoinGecko-hosted asset. The ?1741576480 query string is CoinGecko's
+    // cache-buster and is part of the canonical URL — dropping it can 404.
+    logoURI: "https://assets.coingecko.com/coins/images/54787/standard/bolt.jpg?1741576480",
+    status: "approved",
+  },
 ];
 
 /** Only the entries wallets should actually show. */
