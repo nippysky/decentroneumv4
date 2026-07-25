@@ -3,7 +3,6 @@
 
 import * as React from "react";
 import { ethers } from "ethers";
-import { useActiveAccount } from "thirdweb/react";
 import { FiUpload, FiTrash2, FiCheck, FiAlertTriangle } from "react-icons/fi";
 
 import { Container } from "@/src/ui/Container";
@@ -19,6 +18,7 @@ import {
 } from "@/src/lib/requisites";
 import { AppCard } from "@/src/ui/app/AppCard";
 import { LoadingSpinner } from "@/src/ui/LoadingSpinner";
+import { useAppConnection } from "@/src/lib/useAppConnection";
 import { getProviderOrThrow } from "@/src/lib/chain";
 import { prettyNumber, shortErr } from "@/src/lib/format";
 
@@ -117,9 +117,17 @@ async function safeApproveExact(
 }
 
 export default function BulkSenderClient() {
-  const account = useActiveAccount();
-  const address = account?.address;
-  const connected = !!address;
+  // Must be useAppConnection, NOT thirdweb's useActiveAccount.
+  //
+  // useActiveAccount only knows about connections thirdweb itself manages.
+  // Inside Decent Wallet's in-app browser the wallet is exposed as an
+  // injected EIP-1193 provider, which thirdweb has no knowledge of — so
+  // useActiveAccount returned undefined and this page reported "Not
+  // connected" even while the header pill correctly showed the address.
+  // On a desktop browser with MetaMask it happened to work, which is why
+  // the bug only appeared on mobile. Every other tool here already uses
+  // useAppConnection; this one was the outlier.
+  const { address, isConnected: connected } = useAppConnection();
 
   const [tokenAddress, setTokenAddress] = React.useState("");
   const [tokenMeta, setTokenMeta] = React.useState<TokenMeta | null>(null);

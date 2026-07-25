@@ -121,17 +121,19 @@ function WalletDropdown({
           <span>Copy address</span>
         </button>
 
+        {/* Disconnect now works for Decent Wallet too.
+            This used to be disabled with a "disconnect in wallet menu" hint,
+            because there was no way to revoke an injected connection — the
+            standard wallet_revokePermissions isn't implemented by the
+            in-app browser. Decent Wallet now exposes a `dw_disconnect` RPC
+            method, which dwDisconnect() calls, so the site can genuinely
+            revoke the session itself. */}
         <button
           onClick={onDisconnect}
-          disabled={walletType === "decent"}
-          className={`
+          className="
             w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-colors group
-            ${
-              walletType === "decent"
-                ? "text-muted cursor-not-allowed opacity-60"
-                : "text-red-500 hover:bg-red-500/10"
-            }
-          `}
+            text-red-500 hover:bg-red-500/10
+          "
         >
           <svg
             className="w-4 h-4"
@@ -146,9 +148,7 @@ function WalletDropdown({
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
             />
           </svg>
-          <span>
-            {walletType === "decent" ? "Disconnect in wallet menu" : "Disconnect"}
-          </span>
+          <span>Disconnect</span>
         </button>
       </div>
 

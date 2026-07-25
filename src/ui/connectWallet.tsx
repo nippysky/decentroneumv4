@@ -145,16 +145,21 @@ export default function ConnectWallet() {
     setIsOpen(false);
   }, [address]);
 
-  const doDisconnect = useCallback(() => {
+  const doDisconnect = useCallback(async () => {
+    // Inside Decent Wallet this used to just close the menu and do nothing —
+    // a dead button. dw.disconnect() calls the wallet's `dw_disconnect` RPC,
+    // which actually revokes this site's permission in the native app and
+    // clears the shared address state, so the UI and the wallet agree.
     if (inDW) {
       setIsOpen(false);
+      await dw.disconnect();
       return;
     }
     if (activeWallet) {
       disconnect(activeWallet);
     }
     setIsOpen(false);
-  }, [activeWallet, disconnect, inDW]);
+  }, [activeWallet, disconnect, inDW, dw]);
 
   const connectDW = useCallback(async () => {
     if (!inDW) return;
