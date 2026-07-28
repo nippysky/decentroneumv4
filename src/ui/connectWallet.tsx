@@ -268,7 +268,7 @@ export default function ConnectWallet() {
           connectedButtonBgHover: theme === "light" ? "#ffffff" : "#000000",
           borderColor: theme === "light" ? "#E5E5E5" : "#FFFFFF1A",
         },
-        fontFamily: "Lexend",
+        fontFamily: "var(--font-inter), system-ui, sans-serif",
       })}
     />
   );

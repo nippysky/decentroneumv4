@@ -1,13 +1,22 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
-import { Lexend } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const lexend = Lexend({
+// Inter for UI, JetBrains Mono for hex — matched to the wallet app so the
+// two properties read as one brand. See src/theme/typography.ts in
+// decent-wallet for the full rationale.
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-lexend",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -152,7 +161,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={lexend.variable} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         {/* Structured data helps Google understand your brand/site entity */}
         <Script

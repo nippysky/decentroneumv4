@@ -17,15 +17,16 @@
 
   --primary: #0b1220;
 
-  /* Brand green, inverted for light mode.
-     The neon (#4dee54) scores just 1.44:1 against this cream background —
-     far under the 4.5:1 WCAG AA minimum — so as link/label text it was
-     both hard to read and visually shrill. This is the same brand hue
-     (122.6°) taken down in lightness: 5.56:1 on the page background,
-     5.94:1 on white cards. The neon is kept for dark mode, where it
-     scores 13:1 and looks the way it's supposed to. */
-  --accent: #117415;
-  --success: #117415;
+  /* THE BRAND IS TWO COLORS. Nothing else.
+       Neon #4dee54 — the dark-mode accent (13.1:1 on the dark field)
+       Onyx #131418 — the light-mode accent (16.6:1 on this cream field)
+     They invert: the accent is always whichever one the surface isn't.
+     Onyx is a near-black charcoal, not a green — deliberate restraint, so
+     the neon is the only colour that ever shouts. This replaced a mid-tone
+     forest green that behaved as an unwanted third brand colour. Neon is
+     never a light-mode accent: it scores 1.44:1 here, far under AA. */
+  --accent: #131418;
+  --success: #131418;
   --danger: #ef4444;
 
   /* Decorative-only brand green. Used for ambient glows and soft shadows
@@ -75,7 +76,8 @@
   --color-glow: var(--glow);
 
   /* Brand font from next/font variable set on <html> */
-  --font-sans: var(--font-lexend);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
 }
 
 /* =========================
@@ -89,7 +91,7 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-lexend), system-ui, -apple-system, Segoe UI, Roboto,
+  font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto,
     Arial, sans-serif;
 
   text-rendering: optimizeLegibility;
@@ -145,7 +147,7 @@ html {
 
 /* Keep RainbowKit UI on brand font */
 body [data-rk] {
-  font-family: var(--font-lexend), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 /* If RainbowKit's wrapper affects layout, keep it full-height */
