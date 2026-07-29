@@ -83,9 +83,9 @@ export default function PrivacyPage() {
 
       <LegalSection heading="Third-party apps you connect to">
         <p>
-          Decent Wallet lets you connect to third-party decentralized applications, through its in-app browser or
-          via WalletConnect. Anything you do on those sites is governed by that site&apos;s own privacy policy,
-          not this one. We don&apos;t monitor or log your activity on them.
+          Decent Wallet lets you connect to third-party decentralized applications through its in-app browser.
+          Anything you do on those sites is governed by that site&apos;s own privacy policy, not this one. We
+          don&apos;t monitor or log your activity on them.
         </p>
       </LegalSection>
 

@@ -64,8 +64,8 @@ export default function TermsPage() {
 
       <LegalSection heading="5. Third-party applications">
         <p>
-          Decent Wallet can connect to third-party decentralized applications through its in-app browser or
-          WalletConnect. We do not control, endorse, audit, or take responsibility for any dApp, smart contract,
+          Decent Wallet can connect to third-party decentralized applications through its in-app browser.
+          We do not control, endorse, audit, or take responsibility for any dApp, smart contract,
           or website you interact with. Review what you are approving carefully — a malicious or buggy contract
           can drain funds you grant it access to.
         </p>
