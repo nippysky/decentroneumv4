@@ -141,9 +141,10 @@ export async function POST(req: Request) {
       </table>
       <p style="margin:20px 0 6px;font-weight:600">To approve</p>
       <p style="color:#6b7280;margin:0 0 8px;font-size:13px">
-        Add this entry to <code>src/lib/tokenList.ts</code>, deploy, then update
-        <code>TRACKED_TOKENS</code> on the push server from
-        <code>/api/token-list.json</code> and restart it.
+        Add this entry to <code>src/lib/tokenList.ts</code> and deploy. That is
+        the only step — the push server fetches this registry every 30 minutes
+        and starts watching and pricing the token automatically. No server
+        change, no restart, no app release.
       </p>
       <pre style="background:#0b0f0c;color:#eafbea;padding:14px;border-radius:10px;font-size:12px;overflow:auto">${escapeHtml(
         `{

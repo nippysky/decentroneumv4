@@ -5,9 +5,9 @@
 // This is the single source of truth consumed by:
 //   • Decent Wallet  — fetches /api/token-list.json on launch (6h cache) to
 //                      decide which tokens every user sees in their wallet.
-//   • The push server — its TRACKED_TOKENS list should be derived from the
-//                      same addresses, or users get no notification for a
-//                      token the wallet happily displays.
+//   • The push server — fetches this same endpoint to decide which tokens to
+//                      watch for incoming transfers, and to price. There is no
+//                      second list to keep in step; this file is the only one.
 //
 // To list a new token: add an entry here with status "approved" and deploy.
 // Every wallet picks it up within the cache window — no app release needed.
@@ -54,10 +54,3 @@ export const TOKEN_LIST: TokenEntry[] = [
 
 /** Only the entries wallets should actually show. */
 export const APPROVED_TOKENS = TOKEN_LIST.filter((t) => t.status === "approved");
-
-/**
- * Comma-separated addresses, ready to paste into the push server's
- * TRACKED_TOKENS env var. Exposed via the API response's `trackedTokens`
- * field so the two systems can be reconciled without hand-copying.
- */
-export const TRACKED_TOKENS_CSV = APPROVED_TOKENS.map((t) => t.address).join(",");

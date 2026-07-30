@@ -12,7 +12,7 @@
 // wallet also tolerates a bare array and drops malformed entries
 // individually, so adding fields here is safe.
 import { NextResponse } from "next/server";
-import { APPROVED_TOKENS, TRACKED_TOKENS_CSV } from "@/src/lib/tokenList";
+import { APPROVED_TOKENS } from "@/src/lib/tokenList";
 
 // Static content — let the CDN hold it, and let the wallet's own 6h cache
 // do the rest. Revalidate hourly so a newly listed token propagates
@@ -35,9 +35,6 @@ export async function GET() {
         chainId: 52014,
         status: "approved" as const,
       })),
-      // Convenience for ops: the exact value the push server's
-      // TRACKED_TOKENS env var should hold, so the two can't silently drift.
-      trackedTokens: TRACKED_TOKENS_CSV,
     },
     {
       headers: {
